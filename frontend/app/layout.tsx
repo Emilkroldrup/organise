@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "../styles/globals.css";
-import Navbar from "@/components/Navbar";
+import ReduxProvider from "@/redux/Provider";
+import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
   title: "Organise",
@@ -14,9 +15,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-100">
-        <Navbar />
-        <main className="flex-grow p-4">{children}</main>
+      <body className="flex h-screen bg-gray-100 dark:bg-gray-800 text-white">
+        <ReduxProvider>
+          <div className="flex w-full h-full">
+            <Sidebar />
+            <main className="flex-grow p-6 ml-64">{children}</main>
+          </div>
+        </ReduxProvider>
       </body>
     </html>
   );
