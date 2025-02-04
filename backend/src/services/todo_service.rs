@@ -1,0 +1,30 @@
+use mongodb::{Client, bson::doc};
+use mongodb::error::Error;
+use futures::stream::TryStreamExt;
+use crate::models::todo::Todo;
+
+/// Retrieves all Todo documents from the MongoDB "todos" collection.
+pub async fn get_all_todos(client: &Client) -> Result<Vec<Todo>, Error> {
+    let db = client.database("organise");
+    let collection = db.collection::<Todo>("todos");
+    
+    // Create a cursor to iterate over the todos.
+    let mut cursor = collection.find(doc! {}, None).await?;
+    let mut todos = Vec::new();
+    
+    // Collect all documents into a Vec<Todo>.
+    while let Some(todo) = cursor.try_next().await? {
+        todos.push(todo);
+    }
+    Ok(todos)
+}
+
+/// Inserts a new Todo document into the MongoDB "todos" collection.
+pub async fn add_todo(client: &Client, todo: Todo) -> Result<(), Error> {
+    let db = client.database("organise");
+    let collection = db.collection::<Todo>("todos");
+    
+    // Insert the new todo document.
+    collection.insert_one(todo, None).await?;
+    Ok(())
+}
