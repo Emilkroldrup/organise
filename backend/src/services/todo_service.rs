@@ -6,7 +6,7 @@ use crate::models::todo::Todo;
 /// Retrieves all Todo documents from the MongoDB "todos" collection.
 pub async fn get_all_todos(client: &Client) -> Result<Vec<Todo>, Error> {
     let collection = get_todo_collection(client);
-    let mut cursor = collection.find(doc! {}).await?;
+    let cursor = collection.find(doc! {}).await?;
     collect_todos(cursor).await
 }
 
