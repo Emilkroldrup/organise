@@ -18,17 +18,17 @@ An all-in-one **organiser application** with task management, calendar integrati
 
 ### **Base Structure & Setup**
 
-- [ ] **GitHub Repo & Initial Setup**  
+- [x] **GitHub Repo & Initial Setup**  
   - Init repo & add `.gitignore`
   - Create `README.md` (this file!)
   - Define folder structure for frontend & backend
 
-- [ ] **Frontend Setup (Next.js + Tailwind)**  
+- [x] **Frontend Setup (Next.js + Tailwind)**  
   - Init Next.js
   - Install Tailwind & configure global styles
   - Create base layout & routing system
 
-- [ ] **Backend Setup (Rust + API + Database)**  
+- [x] **Backend Setup (Rust + API + Database)**  
   - Init Rust backend (Actix/Axum)
   - Setup database (PostgreSQL or SQLite)
   - Implement API route structure
