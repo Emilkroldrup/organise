@@ -1,14 +1,7 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
 use mongodb::Client;
-use serde::{Deserialize, Serialize};
 use crate::services::todo_service;
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Todo {
-    pub id: Option<String>,
-    pub title: String,
-    pub completed: bool,
-}
+use crate::models::todo::Todo;
 
 #[get("/todos")]
 async fn get_todos(db: web::Data<Client>) -> impl Responder {
