@@ -30,7 +30,7 @@ export const tasksSlice = createSlice({
         id: crypto.randomUUID(),
         title: action.payload.title,
         completed: false,
-        createdAt: new Date().toISOString(), // Save the creation timestamp
+        createdAt: new Date().toISOString(),
       };
       state.tasks.push(newTask);
       saveTasksToStorage(state.tasks);
