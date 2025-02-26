@@ -4,9 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "4.0"
+actix-web = "4"
 serde = { version = "1.0", features = ["derive"] }
 dotenv = "0.15"
 env_logger = "0.11.6"
-mongodb = "3.2.0"
+mongodb = "3.2.1"
 futures-util = "0.3"
+utoipa = "5.3.1"
+utoipa-swagger-ui = { version = "9.0.0", features = ["actix-web"] }
