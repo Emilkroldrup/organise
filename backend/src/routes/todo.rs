@@ -7,7 +7,7 @@ use crate::models::todo::TodoSchema;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(get_todos, create_todo, edit_todo, delete_todo),
+    paths(get_todos, create_todo, edit_todo, delete_todo, toggle_todo_completion, set_todo_completion),
     components(schemas(TodoSchema)),
     servers(
         (url = "/api", description = "Base URL for API endpoints")
@@ -54,9 +54,18 @@ async fn delete_todo(db: web::Data<Client>, todo_id: web::Path<String>) -> impl 
 #[utoipa::path(patch, path = "/todos/{id}/toggle", responses((status = 200, description = "Toggle a todo's completion status")))]
 #[patch("/todos/{id}/toggle")]
 async fn toggle_todo_completion(db: web::Data<Client>, todo_id: web::Path<String>) -> impl Responder {
-    match todo_service::toggle_todo_completion(&db, &todo_id).await {
-        Ok(_) => HttpResponse::Ok().body("Todo completion status toggled successfully"),
-        Err(e) => HttpResponse::InternalServerError().body(format!("Error toggling todo completion status: {:?}", e)),
+    match todo_service::set_todo_completion(&db, &todo_id).await {
+        Ok(_) => HttpResponse::Ok().body("Todo completion status set to true successfully"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Error setting todo completion status: {:?}", e)),
+    }
+}
+
+#[utoipa::path(patch, path = "/todos/{id}/complete", responses((status = 200, description = "Set a todo's completion status to true")))]
+#[patch("/todos/{id}/complete")]
+async fn set_todo_completion(db: web::Data<Client>, todo_id: web::Path<String>) -> impl Responder {
+    match todo_service::set_todo_completion(&db, &todo_id).await {
+        Ok(_) => HttpResponse::Ok().body("Todo completion status set to true successfully"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Error setting todo completion status: {:?}", e)),
     }
 }
 
@@ -66,6 +75,7 @@ pub fn init_todo_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(edit_todo);
     cfg.service(delete_todo);
     cfg.service(toggle_todo_completion);
+    cfg.service(set_todo_completion);
 }
 
 // Additional error handling

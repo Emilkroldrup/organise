@@ -33,13 +33,13 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
 });
 
 // Async thunk to add a new task to the backend
-export const addTask = createAsyncThunk('tasks/addTask', async (task: { title: string; priority: string }) => {
+export const addTask = createAsyncThunk('tasks/addTask', async (task: { title: string; priority: string; description: string }) => {
   const newTask = {
     title: task.title,
-    description: "",
+    description: task.description,
     completed: false,
     priority: task.priority,
-    created_at: new Date().toISOString(), // Add created_at field
+    created_at: new Date().toISOString(),
   };
   const response = await axios.post('http://localhost:8080/api/todos', newTask);
   return response.data;
@@ -52,12 +52,19 @@ export const toggleTask = createAsyncThunk('tasks/toggleTask', async (id: string
   return response.data;
 });
 
+// Async thunk to set the completion status of a task to true
+export const setTaskCompletion = createAsyncThunk('tasks/setTaskCompletion', async (id: string) => {
+  if (!id) throw new Error('Task ID is required');
+  const response = await axios.patch(`http://localhost:8080/api/todos/${id}/complete`);
+  return response.data;
+});
+
 // Async thunk to edit an existing task
 export const editTask = createAsyncThunk('tasks/editTask', async (task: { id: string; newTitle: string; newPriority: string; newDescription: string }) => {
   if (!task.id) throw new Error('Task ID is required');
   const updatedTask = {
     title: task.newTitle,
-    description: task.newDescription || "",
+    description: task.newDescription,
     completed: false,
     priority: task.newPriority,
     created_at: new Date().toISOString()
@@ -87,6 +94,12 @@ export const tasksSlice = createSlice({
         state.tasks.push(action.payload);
       })
       .addCase(toggleTask.fulfilled, (state, action) => {
+        const task = state.tasks.find((t) => t.id === action.payload.id);
+        if (task) {
+          task.completed = action.payload.completed;
+        }
+      })
+      .addCase(setTaskCompletion.fulfilled, (state, action) => {
         const task = state.tasks.find((t) => t.id === action.payload.id);
         if (task) {
           task.completed = action.payload.completed;

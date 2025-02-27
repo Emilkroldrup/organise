@@ -48,12 +48,12 @@ pub async fn remove_todo(client: &Client, todo_id: &str) -> Result<(), TodoServi
     Ok(())
 }
 
-/// Toggles the completion status of an existing Todo document in the MongoDB "todos" collection.
-pub async fn toggle_todo_completion(client: &Client, todo_id: &str) -> Result<(), TodoServiceError> {
+/// Sets the completion status of an existing Todo document in the MongoDB "todos" collection to true.
+pub async fn set_todo_completion(client: &Client, todo_id: &str) -> Result<(), TodoServiceError> {
     let collection = get_todo_collection(client);
     let object_id = ObjectId::parse_str(todo_id)?;
     let filter = doc! { "_id": object_id };
-    let update = doc! { "$set": { "completed": { "$not": "$completed" } } };
+    let update = doc! { "$set": { "completed": true } };
     collection.update_one(filter, update).await?;
     Ok(())
 }

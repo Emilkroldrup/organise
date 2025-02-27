@@ -8,6 +8,7 @@ import {
   toggleTask,
   editTask,
   deleteTask,
+  setTaskCompletion,
 } from "@/redux/slices/tasksSlice";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -28,9 +29,11 @@ export default function TasksPage() {
   const tasks = useSelector((state: RootState) => state.tasks.tasks);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskPriority, setTaskPriority] = useState("low");
+  const [taskDescription, setTaskDescription] = useState("");
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editedTaskTitle, setEditedTaskTitle] = useState("");
   const [editedTaskPriority, setEditedTaskPriority] = useState("low");
+  const [editedTaskDescription, setEditedTaskDescription] = useState("");
 
   useEffect(() => {
     dispatch(fetchTasks());
@@ -61,11 +64,16 @@ export default function TasksPage() {
             onClick={async () => {
               if (taskTitle.trim()) {
                 await dispatch(
-                  addTask({ title: taskTitle, priority: taskPriority })
+                  addTask({
+                    title: taskTitle,
+                    priority: taskPriority,
+                    description: taskDescription,
+                  })
                 );
                 await dispatch(fetchTasks());
                 setTaskTitle("");
                 setTaskPriority("low");
+                setTaskDescription("");
               }
             }}
             whileTap={{ scale: 0.95 }}
@@ -74,6 +82,12 @@ export default function TasksPage() {
             Add Task
           </motion.button>
         </div>
+        <textarea
+          value={taskDescription}
+          onChange={(e) => setTaskDescription(e.target.value)}
+          placeholder="Task Description..."
+          className="border p-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black shadow-sm mb-2"
+        />
 
         {/* Task Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -111,6 +125,13 @@ export default function TasksPage() {
                             <option value="medium">Medium</option>
                             <option value="high">High</option>
                           </select>
+                          <textarea
+                            value={editedTaskDescription}
+                            onChange={(e) =>
+                              setEditedTaskDescription(e.target.value)
+                            }
+                            className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white bg-white dark:bg-gray-800 mb-2 shadow-sm"
+                          />
                         </div>
                       ) : (
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -121,11 +142,14 @@ export default function TasksPage() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Added: {new Date(task.createdAt).toLocaleString()}
                     </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      {task.description}
+                    </p>
                     <div className="flex justify-between items-center">
                       {task.id && (
                         <motion.button
                           whileTap={{ scale: 0.95 }}
-                          onClick={() => dispatch(toggleTask(task.id))}
+                          onClick={() => dispatch(setTaskCompletion(task.id))}
                           className={`px-4 py-2 rounded-lg transition-colors shadow-sm ${
                             task.completed
                               ? "bg-green-500 text-white hover:bg-green-600"
@@ -144,9 +168,11 @@ export default function TasksPage() {
                                 id: task.id,
                                 newTitle: editedTaskTitle,
                                 newPriority: editedTaskPriority,
+                                newDescription: editedTaskDescription,
                               })
                             );
                             setEditingTaskId(null);
+                            setEditedTaskDescription("");
                           }}
                           className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
                         >
@@ -159,6 +185,7 @@ export default function TasksPage() {
                             setEditingTaskId(task.id);
                             setEditedTaskTitle(task.title);
                             setEditedTaskPriority(task.priority);
+                            setEditedTaskDescription(task.description);
                           }}
                           className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors shadow-sm"
                         >
