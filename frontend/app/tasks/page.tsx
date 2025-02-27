@@ -46,12 +46,12 @@ export default function TasksPage() {
             value={taskTitle}
             onChange={(e) => setTaskTitle(e.target.value)}
             placeholder="New Task..."
-            className="border p-2 rounded-lg w-3/4 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+            className="border p-2 rounded-lg w-3/4 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black shadow-sm"
           />
           <select
             value={taskPriority}
             onChange={(e) => setTaskPriority(e.target.value)}
-            className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+            className="border p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-black shadow-sm"
           >
             <option value="low">Low</option>
             <option value="medium">Medium</option>
@@ -69,7 +69,7 @@ export default function TasksPage() {
               }
             }}
             whileTap={{ scale: 0.95 }}
-            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-transform"
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-transform shadow-lg"
           >
             Add Task
           </motion.button>
@@ -98,14 +98,14 @@ export default function TasksPage() {
                             type="text"
                             value={editedTaskTitle}
                             onChange={(e) => setEditedTaskTitle(e.target.value)}
-                            className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white bg-white dark:bg-gray-800 mb-2"
+                            className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white bg-white dark:bg-gray-800 mb-2 shadow-sm"
                           />
                           <select
                             value={editedTaskPriority}
                             onChange={(e) =>
                               setEditedTaskPriority(e.target.value)
                             }
-                            className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white bg-white dark:bg-gray-800 mb-2"
+                            className="border p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-blue-400 text-black dark:text-white bg-white dark:bg-gray-800 mb-2 shadow-sm"
                           >
                             <option value="low">Low</option>
                             <option value="medium">Medium</option>
@@ -126,7 +126,7 @@ export default function TasksPage() {
                         <motion.button
                           whileTap={{ scale: 0.95 }}
                           onClick={() => dispatch(toggleTask(task.id))}
-                          className={`px-4 py-2 rounded-lg transition-colors ${
+                          className={`px-4 py-2 rounded-lg transition-colors shadow-sm ${
                             task.completed
                               ? "bg-green-500 text-white hover:bg-green-600"
                               : "bg-gray-300 text-black hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
@@ -148,7 +148,7 @@ export default function TasksPage() {
                             );
                             setEditingTaskId(null);
                           }}
-                          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
                         >
                           Save
                         </motion.button>
@@ -160,7 +160,7 @@ export default function TasksPage() {
                             setEditedTaskTitle(task.title);
                             setEditedTaskPriority(task.priority);
                           }}
-                          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors"
+                          className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors shadow-sm"
                         >
                           Edit
                         </motion.button>

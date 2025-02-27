@@ -57,10 +57,10 @@ export const editTask = createAsyncThunk('tasks/editTask', async (task: { id: st
   if (!task.id) throw new Error('Task ID is required');
   const updatedTask = {
     title: task.newTitle,
-    description: task.newDescription || "", // Ensure description is not missing
-    completed: false, // Default to not completed
-    priority: task.newPriority, // Update priority
-    created_at: new Date().toISOString() // Add created_at field
+    description: task.newDescription || "",
+    completed: false,
+    priority: task.newPriority,
+    created_at: new Date().toISOString()
   };
   await axios.put(`http://localhost:8080/api/todos/${task.id}`, updatedTask);
   return { id: task.id, ...updatedTask };
@@ -97,7 +97,7 @@ export const tasksSlice = createSlice({
         if (task) {
           task.title = action.payload.title;
           task.priority = action.payload.priority;
-          task.description = action.payload.description; // Update description in state
+          task.description = action.payload.description;
         }
       })
       .addCase(deleteTask.fulfilled, (state, action) => {

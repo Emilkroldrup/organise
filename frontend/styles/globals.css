@@ -17,5 +17,44 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Add some modern styling for buttons */
+button {
+  background-color: var(--foreground);
+  color: var(--background);
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+button:hover {
+  background-color: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--foreground);
+}
+
+/* Add some modern styling for links */
+a {
+  color: var(--foreground);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+a:hover {
+  color: #1e90ff;
+}
+
+/* Add some modern styling for inputs */
+input {
+  padding: 0.5rem;
+  border: 1px solid var(--foreground);
+  border-radius: 0.375rem;
+  transition: border-color 0.3s;
+}
+input:focus {
+  border-color: #1e90ff;
+  outline: none;
 }

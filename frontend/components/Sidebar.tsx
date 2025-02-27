@@ -7,7 +7,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="h-screen w-64 bg-[#3A4248] text-white p-6 flex flex-col">
+    <aside className="h-screen w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white p-6 flex flex-col shadow-lg">
       <img src="/logo.png" alt="Logo" className="w-32 h-auto mx-auto mb-6" />
       <h2 className="text-2xl font-bold mb-6 text-center">Organiser</h2>
       <nav className="flex flex-col space-y-4">
