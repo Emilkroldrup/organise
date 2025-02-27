@@ -1,4 +1,4 @@
-use actix_web::{get, post, put, delete, web, HttpResponse, Responder};
+use actix_web::{get, post, put, patch, delete, web, HttpResponse, Responder};
 use mongodb::Client;
 use utoipa::OpenApi;
 
@@ -51,11 +51,21 @@ async fn delete_todo(db: web::Data<Client>, todo_id: web::Path<String>) -> impl 
     }
 }
 
+#[utoipa::path(patch, path = "/todos/{id}/toggle", responses((status = 200, description = "Toggle a todo's completion status")))]
+#[patch("/todos/{id}/toggle")]
+async fn toggle_todo_completion(db: web::Data<Client>, todo_id: web::Path<String>) -> impl Responder {
+    match todo_service::toggle_todo_completion(&db, &todo_id).await {
+        Ok(_) => HttpResponse::Ok().body("Todo completion status toggled successfully"),
+        Err(e) => HttpResponse::InternalServerError().body(format!("Error toggling todo completion status: {:?}", e)),
+    }
+}
+
 pub fn init_todo_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_todos);
     cfg.service(create_todo);
     cfg.service(edit_todo);
     cfg.service(delete_todo);
+    cfg.service(toggle_todo_completion);
 }
 
 // Additional error handling

@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 use env_logger;
@@ -24,10 +25,16 @@ async fn main() -> std::io::Result<()> {
     println!("Starting server at {}", server_address);
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
         App::new()
             .app_data(actix_web::web::Data::new(mongo_client.clone()))
             .configure(routes::init_routes)
             .service(SwaggerUi::new("/api-docs/{_:.*}").url("/api-doc/openapi.json", ApiDoc::openapi()))
+            .wrap(cors)
     })
     .bind(server_address)?
     .run()

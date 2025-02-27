@@ -10,6 +10,7 @@ pub struct Todo {
     pub description: String,
     pub completed: bool,
     pub priority: String,
+    pub created_at: String,
 }
 
 impl From<TodoSchema> for Todo {
@@ -20,6 +21,7 @@ impl From<TodoSchema> for Todo {
             description: schema.description,
             completed: schema.completed,
             priority: schema.priority,
+            created_at: schema.created_at,
         }
     }
 }
@@ -30,4 +32,5 @@ pub struct TodoSchema {
     pub description: String,
     pub completed: bool,
     pub priority: String,
+    pub created_at: String,
 }

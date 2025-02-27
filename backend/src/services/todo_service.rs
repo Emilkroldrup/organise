@@ -24,6 +24,7 @@ pub async fn get_all_todos(client: &Client) -> Result<Vec<Todo>, TodoServiceErro
 pub async fn add_todo(client: &Client, mut todo: Todo) -> Result<(), TodoServiceError> {
     let collection = get_todo_collection(client);
     todo.id = Some(ObjectId::new());
+    todo.created_at = chrono::Utc::now().to_rfc3339(); // Set created_at field
     collection.insert_one(todo).await?;
     Ok(())
 }
@@ -44,6 +45,16 @@ pub async fn remove_todo(client: &Client, todo_id: &str) -> Result<(), TodoServi
     let object_id = ObjectId::parse_str(todo_id)?;
     let filter = doc! { "_id": object_id };
     collection.delete_one(filter).await?;
+    Ok(())
+}
+
+/// Toggles the completion status of an existing Todo document in the MongoDB "todos" collection.
+pub async fn toggle_todo_completion(client: &Client, todo_id: &str) -> Result<(), TodoServiceError> {
+    let collection = get_todo_collection(client);
+    let object_id = ObjectId::parse_str(todo_id)?;
+    let filter = doc! { "_id": object_id };
+    let update = doc! { "$set": { "completed": { "$not": "$completed" } } };
+    collection.update_one(filter, update).await?;
     Ok(())
 }
 
