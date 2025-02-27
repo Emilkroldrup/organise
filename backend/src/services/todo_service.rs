@@ -2,19 +2,48 @@ use mongodb::{Client, bson::{doc, oid::ObjectId}};
 use mongodb::error::Error;
 use futures_util::TryStreamExt;
 use crate::models::todo::Todo;
+use thiserror::Error;
+use actix_web::HttpResponse;
+
+#[derive(Error, Debug)]
+pub enum TodoServiceError {
+    #[error("Database error: {0}")]
+    DatabaseError(#[from] Error),
+    #[error("Invalid ObjectId: {0}")]
+    InvalidObjectId(#[from] mongodb::bson::oid::Error),
+}
 
 /// Retrieves all Todo documents from the MongoDB "todos" collection.
-pub async fn get_all_todos(client: &Client) -> Result<Vec<Todo>, Error> {
+pub async fn get_all_todos(client: &Client) -> Result<Vec<Todo>, TodoServiceError> {
     let collection = get_todo_collection(client);
     let cursor = collection.find(doc! {}).await?;
-    collect_todos(cursor).await
+    collect_todos(cursor).await.map_err(TodoServiceError::from)
 }
 
 /// Inserts a new Todo document into the MongoDB "todos" collection.
-pub async fn add_todo(client: &Client, mut todo: Todo) -> Result<(), Error> {
+pub async fn add_todo(client: &Client, mut todo: Todo) -> Result<(), TodoServiceError> {
     let collection = get_todo_collection(client);
-    todo.id = Some(ObjectId::new().to_hex());
+    todo.id = Some(ObjectId::new());
     collection.insert_one(todo).await?;
+    Ok(())
+}
+
+/// Updates an existing Todo document in the MongoDB "todos" collection.
+pub async fn update_todo(client: &Client, todo_id: &str, updated_todo: Todo) -> Result<(), TodoServiceError> {
+    let collection = get_todo_collection(client);
+    let object_id = ObjectId::parse_str(todo_id)?;
+    let filter = doc! { "_id": object_id };
+    let update = doc! { "$set": { "title": updated_todo.title, "description": updated_todo.description, "completed": updated_todo.completed, "priority": updated_todo.priority } };
+    collection.update_one(filter, update).await?;
+    Ok(())
+}
+
+/// Removes an existing Todo document from the MongoDB "todos" collection.
+pub async fn remove_todo(client: &Client, todo_id: &str) -> Result<(), TodoServiceError> {
+    let collection = get_todo_collection(client);
+    let object_id = ObjectId::parse_str(todo_id)?;
+    let filter = doc! { "_id": object_id };
+    collection.delete_one(filter).await?;
     Ok(())
 }
 
@@ -31,4 +60,12 @@ async fn collect_todos(mut cursor: mongodb::Cursor<Todo>) -> Result<Vec<Todo>, E
         todos.push(todo);
     }
     Ok(todos)
+}
+
+// Custom function to convert TodoServiceError to HttpResponse
+pub fn error_response(error: TodoServiceError) -> HttpResponse {
+    match error {
+        TodoServiceError::DatabaseError(e) => HttpResponse::InternalServerError().body(format!("Database error: {}", e)),
+        TodoServiceError::InvalidObjectId(e) => HttpResponse::BadRequest().body(format!("Invalid ObjectId: {}", e)),
+    }
 }
