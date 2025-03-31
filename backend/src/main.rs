@@ -4,7 +4,6 @@ use dotenv::dotenv;
 use env_logger;
 use std::env;
 use utoipa::OpenApi;
-use utoipa_swagger_ui::SwaggerUi;
 use mongodb::Client;
 
 use backend::routes;
@@ -35,7 +34,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(actix_web::web::Data::new(mongo_client.clone()))
             .configure(routes::init_routes)
             .configure(notes::init_routes)
-            .service(SwaggerUi::new("/api-docs/{_:.*}").url("/api-doc/openapi.json", ApiDoc::openapi()))
+            .route("/api-doc/openapi.json", actix_web::web::get().to(|| async { actix_web::HttpResponse::Ok().json(ApiDoc::openapi()) }))
             .wrap(cors)
     })
     .bind(server_address)?
