@@ -13,4 +13,5 @@ mongodb = "3.2.1"
 futures-util = "0.3"
 utoipa = "5.3.1"
 actix-cors = "0.7.0"
-chrono = "0.4.40"
+chrono = { version = "0.4", features = ["serde"] }
+validator = { version = "0.16", features = ["derive"] }

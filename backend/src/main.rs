@@ -3,12 +3,9 @@ use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 use env_logger;
 use std::env;
-use utoipa::OpenApi;
 use mongodb::Client;
 
 use backend::routes;
-use backend::routes::todo::ApiDoc;
-use backend::routes::notes;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -33,8 +30,6 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(actix_web::web::Data::new(mongo_client.clone()))
             .configure(routes::init_routes)
-            .configure(notes::init_routes)
-            .route("/api-doc/openapi.json", actix_web::web::get().to(|| async { actix_web::HttpResponse::Ok().json(ApiDoc::openapi()) }))
             .wrap(cors)
     })
     .bind(server_address)?
