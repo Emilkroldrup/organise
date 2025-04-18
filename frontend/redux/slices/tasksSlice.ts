@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from 'axios';
 
 interface Task {
@@ -84,7 +84,11 @@ export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id: string
 export const tasksSlice = createSlice({
   name: "tasks",
   initialState,
-  reducers: {},
+  reducers: {
+    reorderTasks: (state, action: PayloadAction<Task[]>) => {
+      state.tasks = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchTasks.fulfilled, (state, action) => {
@@ -119,4 +123,5 @@ export const tasksSlice = createSlice({
   },
 });
 
+export const { reorderTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;

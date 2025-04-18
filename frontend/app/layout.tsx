@@ -15,11 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex h-screen bg-gray-100 dark:bg-gray-800 text-white">
+      <body className="flex h-screen overflow-hidden bg-gray-900">
         <ReduxProvider>
           <div className="flex w-full h-full">
             <Sidebar />
-            <main className="flex-grow p-6 ml-64">{children}</main>
+            <main className="flex-grow h-screen overflow-auto">{children}</main>
           </div>
         </ReduxProvider>
       </body>
