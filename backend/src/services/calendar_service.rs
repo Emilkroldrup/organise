@@ -1,13 +1,12 @@
-use mongodb::{Client, bson::{doc, oid::ObjectId}};
+use mongodb::{Client, bson::{doc, oid::ObjectId, DateTime as BsonDateTime}};
 use mongodb::error::Error;
 use futures_util::TryStreamExt;
 use crate::models::calendar::{CalendarEvent, GoogleCalendarCredentials, GoogleCalendarToken};
 use thiserror::Error;
 use actix_web::HttpResponse;
 use chrono::{DateTime, Utc};
-use validator::Validate;
 use reqwest;
-use serde_json::json;
+use std::time::SystemTime;
 
 #[derive(Error, Debug)]
 pub enum CalendarServiceError {
@@ -18,11 +17,21 @@ pub enum CalendarServiceError {
     #[error("Event not found")]
     EventNotFound,
     #[error("Validation error: {0}")]
-    ValidationError(validator::ValidationErrors),
+    ValidationError(#[from] validator::ValidationErrors),
     #[error("Google Calendar API error: {0}")]
     GoogleApiError(String),
     #[error("Authentication error: {0}")]
     AuthError(String),
+}
+
+/// Converts a chrono DateTime to MongoDB's BsonDateTime
+fn to_bson_datetime(date: DateTime<Utc>) -> BsonDateTime {
+    // Convert to milliseconds since epoch
+    let millis = date.timestamp_millis() as u64;
+    // Create a SystemTime that represents the same point in time
+    let system_time = SystemTime::UNIX_EPOCH + std::time::Duration::from_millis(millis);
+    // Convert to BsonDateTime
+    BsonDateTime::from_system_time(system_time)
 }
 
 /// Retrieves all calendar events from the MongoDB "calendar_events" collection.
@@ -42,15 +51,15 @@ pub async fn get_events_by_date_range(
     let filter = doc! {
         "$or": [
             {
-                "start_time": { "$gte": start_date, "$lte": end_date }
+                "start_time": { "$gte": to_bson_datetime(start_date), "$lte": to_bson_datetime(end_date) }
             },
             {
-                "end_time": { "$gte": start_date, "$lte": end_date }
+                "end_time": { "$gte": to_bson_datetime(start_date), "$lte": to_bson_datetime(end_date) }
             },
             {
                 "$and": [
-                    { "start_time": { "$lte": start_date } },
-                    { "end_time": { "$gte": end_date } }
+                    { "start_time": { "$lte": to_bson_datetime(start_date) } },
+                    { "end_time": { "$gte": to_bson_datetime(end_date) } }
                 ]
             }
         ]
@@ -61,22 +70,22 @@ pub async fn get_events_by_date_range(
 
 /// Inserts a new calendar event into the MongoDB "calendar_events" collection.
 pub async fn add_event(client: &Client, mut event: CalendarEvent) -> Result<(), CalendarServiceError> {
-    if let Err(e) = event.validate() {
-        return Err(CalendarServiceError::ValidationError(e));
+    if let Err(_e) = event.validate() {
+        return Err(CalendarServiceError::ValidationError(validator::ValidationErrors::new()));
     }
 
     let collection = get_calendar_collection(client);
     event.id = Some(ObjectId::new());
-    event.created_at = Some(Utc::now());
-    event.updated_at = Some(Utc::now());
+    event.created_at = Utc::now();
+    event.updated_at = Utc::now();
     collection.insert_one(event).await?;
     Ok(())
 }
 
 /// Updates an existing calendar event in the MongoDB "calendar_events" collection.
 pub async fn update_event(client: &Client, event_id: &str, mut updated_event: CalendarEvent) -> Result<(), CalendarServiceError> {
-    if let Err(e) = updated_event.validate() {
-        return Err(CalendarServiceError::ValidationError(e));
+    if let Err(_e) = updated_event.validate() {
+        return Err(CalendarServiceError::ValidationError(validator::ValidationErrors::new()));
     }
 
     let collection = get_calendar_collection(client);
@@ -89,19 +98,19 @@ pub async fn update_event(client: &Client, event_id: &str, mut updated_event: Ca
         return Err(CalendarServiceError::EventNotFound);
     }
 
-    updated_event.updated_at = Some(Utc::now());
+    updated_event.updated_at = Utc::now();
     let update = doc! { 
         "$set": { 
             "title": updated_event.title, 
             "description": updated_event.description, 
-            "start_time": updated_event.start_time, 
-            "end_time": updated_event.end_time,
+            "start_time": to_bson_datetime(updated_event.start_time), 
+            "end_time": to_bson_datetime(updated_event.end_time),
             "location": updated_event.location,
-            "color_id": updated_event.color_id,
+            "color": updated_event.color,
             "is_all_day": updated_event.is_all_day,
-            "recurrence": updated_event.recurrence,
+            "recurrence_rule": updated_event.recurrence_rule,
             "attendees": updated_event.attendees,
-            "updated_at": updated_event.updated_at
+            "updated_at": to_bson_datetime(updated_event.updated_at)
         } 
     };
     collection.update_one(filter, update).await?;
@@ -126,8 +135,8 @@ pub async fn remove_event(client: &Client, event_id: &str) -> Result<(), Calenda
 
 /// Syncs events with Google Calendar
 pub async fn sync_with_google_calendar(
-    client: &Client, 
-    credentials: &GoogleCalendarCredentials,
+    _client: &Client, 
+    _credentials: &GoogleCalendarCredentials,
     token: &GoogleCalendarToken
 ) -> Result<(), CalendarServiceError> {
     // This is a placeholder for the actual Google Calendar API integration
@@ -183,4 +192,4 @@ pub fn error_response(error: CalendarServiceError) -> HttpResponse {
         CalendarServiceError::GoogleApiError(e) => HttpResponse::InternalServerError().body(format!("Google Calendar API error: {}", e)),
         CalendarServiceError::AuthError(e) => HttpResponse::Unauthorized().body(format!("Authentication error: {}", e)),
     }
-} 
+}
