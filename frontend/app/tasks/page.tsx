@@ -1,4 +1,5 @@
 "use client";
+/* cSpell:ignore pangea */
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState, useAppDispatch } from "@/redux/store";
@@ -25,7 +26,15 @@ interface Task {
   description: string;
   completed: boolean;
   priority: string;
-  createdAt: string;
+  created_at: string; // Changed from createdAt to created_at to match Redux store
+  updated_at?: string;
+}
+
+// Interface for creating a new task (without id and created_at which are handled by the backend)
+interface CreateTaskInput {
+  title: string;
+  description: string;
+  priority: string;
 }
 
 const getBorderColor = (priority: string) => {
@@ -125,8 +134,11 @@ export default function TasksPage() {
 
       const [movedItem] = sourceItems.splice(source.index, 1);
 
-      // Update the task priority
-      const updatedItem = { ...movedItem, priority: destPriority };
+      // Update the task priority - preserve all existing properties
+      const updatedItem: Task = { 
+        ...movedItem, 
+        priority: destPriority 
+      };
 
       // Update store
       dispatch(
@@ -279,7 +291,7 @@ export default function TasksPage() {
 
                 <div className="flex justify-between items-center">
                   <div className="text-xs text-gray-500">
-                    {new Date(task.createdAt).toLocaleDateString()}
+                    {new Date(task.created_at).toLocaleDateString()}
                   </div>
 
                   <div className="flex gap-2">
@@ -421,7 +433,7 @@ export default function TasksPage() {
                         title: taskTitle,
                         priority: taskPriority,
                         description: taskDescription,
-                      })
+                      } as CreateTaskInput)
                     );
                     await dispatch(fetchTasks());
                     setTaskTitle("");
