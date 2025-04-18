@@ -21,7 +21,9 @@ export default function RootLayout({
           <GlobalErrorProvider>
             <div className="flex w-full h-full">
               <Sidebar />
-              <main className="flex-grow h-screen overflow-auto">{children}</main>
+              <main className="flex-grow h-screen overflow-auto">
+                {children}
+              </main>
             </div>
           </GlobalErrorProvider>
         </ReduxProvider>

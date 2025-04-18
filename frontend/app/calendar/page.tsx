@@ -57,7 +57,7 @@ export default function CalendarPage() {
   const selectedDate = useSelector(selectSelectedDate);
   const view = useSelector(selectView);
   const { showError } = useError();
-  
+
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
@@ -95,8 +95,8 @@ export default function CalendarPage() {
   }, [error, showError, dispatch]);
 
   useEffect(() => {
-    const startDate = moment().startOf('month').toISOString();
-    const endDate = moment().endOf('month').toISOString();
+    const startDate = moment().startOf("month").toISOString();
+    const endDate = moment().endOf("month").toISOString();
     dispatch(fetchEvents({ start: startDate, end: endDate }));
   }, [dispatch]);
 
@@ -135,39 +135,41 @@ export default function CalendarPage() {
 
   const handleNavigate = (newDate: Date) => {
     dispatch(setSelectedDate(newDate.toISOString()));
-    
+
     // Fetch events for the new date range
-    const start = moment(newDate).startOf('month').toISOString();
-    const end = moment(newDate).endOf('month').toISOString();
+    const start = moment(newDate).startOf("month").toISOString();
+    const end = moment(newDate).endOf("month").toISOString();
     dispatch(fetchEvents({ start, end }));
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate the form data
     const startTime = new Date(formData.start_time);
     const endTime = new Date(formData.end_time);
-    
+
     if (startTime >= endTime) {
       showError("End time must be after start time");
       return;
     }
-    
+
     const eventData = {
       ...formData,
       attendees: [], // Default empty array for attendees
     };
-    
+
     if (isEditing && formData.id) {
-      dispatch(updateEvent({
-        id: formData.id,
-        ...eventData
-      }));
+      dispatch(
+        updateEvent({
+          id: formData.id,
+          ...eventData,
+        })
+      );
     } else {
       dispatch(addEvent(eventData));
     }
-    
+
     setShowModal(false);
     resetForm();
   };
@@ -196,13 +198,13 @@ export default function CalendarPage() {
   const eventStyleGetter = (event: CalendarEvent) => {
     const style = {
       backgroundColor: event.resource?.color ?? "#3174ad",
-      borderRadius: '5px',
-      color: '#fff',
-      border: 'none',
-      display: 'block',
+      borderRadius: "5px",
+      color: "#fff",
+      border: "none",
+      display: "block",
     };
     return {
-      style
+      style,
     };
   };
 
@@ -258,11 +260,14 @@ export default function CalendarPage() {
             <h2 className="text-xl font-bold text-white mb-4">
               {isEditing ? "Edit Event" : "Add New Event"}
             </h2>
-            
+
             <form onSubmit={handleFormSubmit}>
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
                     Title
                   </label>
                   <input
@@ -270,19 +275,26 @@ export default function CalendarPage() {
                     type="text"
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({...formData, title: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="border border-gray-700 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white"
                   />
                 </div>
-                
+
                 <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
                     Description
                   </label>
                   <textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     className="border border-gray-700 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white"
                     rows={3}
                   />
@@ -294,31 +306,47 @@ export default function CalendarPage() {
                       type="checkbox"
                       id="is_all_day"
                       checked={formData.is_all_day}
-                      onChange={(e) => setFormData({...formData, is_all_day: e.target.checked})}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          is_all_day: e.target.checked,
+                        })
+                      }
                       className="mr-2"
                     />
-                    <label htmlFor="is_all_day" className="text-sm font-medium text-gray-300">
+                    <label
+                      htmlFor="is_all_day"
+                      className="text-sm font-medium text-gray-300"
+                    >
                       All Day
                     </label>
                   </div>
-                  
+
                   <div className="flex-shrink-0">
-                    <label htmlFor="color" className="block text-sm font-medium text-gray-300 mb-1">
+                    <label
+                      htmlFor="color"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
                       Color
                     </label>
                     <input
                       id="color"
                       type="color"
                       value={formData.color}
-                      onChange={(e) => setFormData({...formData, color: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, color: e.target.value })
+                      }
                       className="p-1 rounded w-full h-8 cursor-pointer"
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="start_time" className="block text-sm font-medium text-gray-300 mb-1">
+                    <label
+                      htmlFor="start_time"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
                       Start Time
                     </label>
                     <input
@@ -326,13 +354,18 @@ export default function CalendarPage() {
                       type="datetime-local"
                       required
                       value={formData.start_time}
-                      onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, start_time: e.target.value })
+                      }
                       className="border border-gray-700 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white"
                     />
                   </div>
-                  
+
                   <div>
-                    <label htmlFor="end_time" className="block text-sm font-medium text-gray-300 mb-1">
+                    <label
+                      htmlFor="end_time"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
                       End Time
                     </label>
                     <input
@@ -340,25 +373,32 @@ export default function CalendarPage() {
                       type="datetime-local"
                       required
                       value={formData.end_time}
-                      onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, end_time: e.target.value })
+                      }
                       className="border border-gray-700 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white"
                     />
                   </div>
                 </div>
-                
+
                 <div>
-                  <label htmlFor="location" className="block text-sm font-medium text-gray-300 mb-1">
+                  <label
+                    htmlFor="location"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
                     Location
                   </label>
                   <input
                     id="location"
                     type="text"
                     value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, location: e.target.value })
+                    }
                     className="border border-gray-700 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white"
                   />
                 </div>
-                
+
                 <div className="flex justify-between pt-4">
                   <div className="space-x-2">
                     {isEditing && (
@@ -371,7 +411,7 @@ export default function CalendarPage() {
                       </button>
                     )}
                   </div>
-                  
+
                   <div className="space-x-2">
                     <button
                       type="button"
@@ -380,7 +420,7 @@ export default function CalendarPage() {
                     >
                       Cancel
                     </button>
-                    
+
                     <button
                       type="submit"
                       className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"

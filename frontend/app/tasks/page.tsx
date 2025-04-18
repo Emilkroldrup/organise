@@ -135,9 +135,9 @@ export default function TasksPage() {
       const [movedItem] = sourceItems.splice(source.index, 1);
 
       // Update the task priority - preserve all existing properties
-      const updatedItem: Task = { 
-        ...movedItem, 
-        priority: destPriority 
+      const updatedItem: Task = {
+        ...movedItem,
+        priority: destPriority,
       };
 
       // Update store
