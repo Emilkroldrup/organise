@@ -76,14 +76,37 @@ export default function TasksPage() {
   const [editedTaskPriority, setEditedTaskPriority] = useState("low");
   const [editedTaskDescription, setEditedTaskDescription] = useState("");
 
+  // Filter states
+  const [showCompleted, setShowCompleted] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     dispatch(fetchTasks());
   }, [dispatch]);
 
+  // Filter tasks based on showCompleted and searchTerm
+  const filteredTasks = tasks.filter((task) => {
+    // Filter by completion status
+    if (!showCompleted && task.completed) {
+      return false;
+    }
+
+    // Filter by search term in title or description
+    if (
+      searchTerm &&
+      !task.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !task.description.toLowerCase().includes(searchTerm.toLowerCase())
+    ) {
+      return false;
+    }
+
+    return true;
+  });
+
   const prioritizedTasks = {
-    high: tasks.filter((task) => task.priority === "high"),
-    medium: tasks.filter((task) => task.priority === "medium"),
-    low: tasks.filter((task) => task.priority === "low"),
+    high: filteredTasks.filter((task) => task.priority === "high"),
+    medium: filteredTasks.filter((task) => task.priority === "medium"),
+    low: filteredTasks.filter((task) => task.priority === "low"),
   };
 
   const handleDragEnd = (result: DropResult) => {
@@ -410,6 +433,46 @@ export default function TasksPage() {
               >
                 Add Task
               </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Options */}
+      <div className="p-6 pb-4">
+        <div className="bg-gray-800 rounded-md p-5 shadow-lg border border-gray-700">
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="search-term"
+                className="block text-sm font-medium text-gray-300 mb-1"
+              >
+                Search Tasks
+              </label>
+              <input
+                id="search-term"
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by title or description..."
+                className="border border-gray-700 p-3 rounded-md w-full focus:outline-none focus:ring-1 focus:ring-blue-500 bg-gray-700 text-white placeholder-gray-500"
+              />
+            </div>
+
+            <div className="flex items-center">
+              <input
+                id="show-completed"
+                type="checkbox"
+                checked={showCompleted}
+                onChange={(e) => setShowCompleted(e.target.checked)}
+                className="form-checkbox h-5 w-5 text-blue-600"
+              />
+              <label
+                htmlFor="show-completed"
+                className="ml-2 text-sm font-medium text-gray-300"
+              >
+                Show Completed Tasks
+              </label>
             </div>
           </div>
         </div>

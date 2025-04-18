@@ -5,6 +5,11 @@ interface Note {
   id: string;
   title: string;
   content: string;
+  created_at?: string;
+  updated_at?: string;
+  tags?: string[];
+  is_archived?: boolean;
+  user_id?: string;
 }
 
 interface NotesState {
@@ -62,6 +67,19 @@ export const deleteNote = createAsyncThunk(
   }
 );
 
+export const archiveNote = createAsyncThunk(
+  "notes/archiveNote",
+  async (noteId: string) => {
+    const response = await fetch(`/api/notes/${noteId}/archive`, {
+      method: "POST",
+    });
+    if (!response.ok) {
+      throw new Error("Failed to archive note");
+    }
+    return noteId;
+  }
+);
+
 const notesSlice = createSlice({
   name: "notes",
   initialState,
@@ -90,11 +108,25 @@ const notesSlice = createSlice({
       })
       .addCase(deleteNote.fulfilled, (state, action: PayloadAction<string>) => {
         state.notes = state.notes.filter((note) => note.id !== action.payload);
+      })
+      .addCase(archiveNote.fulfilled, (state, action: PayloadAction<string>) => {
+        const index = state.notes.findIndex((note) => note.id === action.payload);
+        if (index !== -1) {
+          state.notes[index].is_archived = true;
+        }
       });
   },
 });
 
 export default notesSlice.reducer;
 export const selectAllNotes = (state: RootState) => state.notes.notes;
+export const selectNotesStatus = (state: RootState) => state.notes.status;
+export const selectNotesError = (state: RootState) => state.notes.error;
 export const selectNoteById = (state: RootState, noteId: string) =>
   state.notes.notes.find((note) => note.id === noteId);
+export const selectActiveNotes = (state: RootState) =>
+  state.notes.notes.filter((note) => !note.is_archived);
+export const selectArchivedNotes = (state: RootState) =>
+  state.notes.notes.filter((note) => note.is_archived);
+export const selectNotesByTag = (state: RootState, tag: string) =>
+  state.notes.notes.filter((note) => note.tags && note.tags.includes(tag));
