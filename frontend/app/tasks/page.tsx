@@ -5,7 +5,6 @@ import { RootState, useAppDispatch } from "@/redux/store";
 import {
   fetchTasks,
   addTask,
-  toggleTask,
   editTask,
   deleteTask,
   setTaskCompletion,

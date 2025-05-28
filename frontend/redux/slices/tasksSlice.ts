@@ -18,10 +18,12 @@ const initialState: TasksState = {
   tasks: [],
 };
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8080/api';
+
 // Async thunk to fetch tasks from the backend
 export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
-  const response = await axios.get('http://localhost:8080/api/todos');
-  const tasks = response.data.map((task: { _id: { $oid: string }; title: string; description: string; completed: boolean; priority: string; created_at: string }) => ({
+  const response = await axios.get(`${API_BASE_URL}/todos`);
+  const tasks = (response.data as Array<{ _id: { $oid: string }; title: string; description: string; completed: boolean; priority: string; created_at: string }>).map((task) => ({
     id: task._id.$oid,
     title: task.title,
     description: task.description,
@@ -41,21 +43,21 @@ export const addTask = createAsyncThunk('tasks/addTask', async (task: { title: s
     priority: task.priority,
     created_at: new Date().toISOString(),
   };
-  const response = await axios.post('http://localhost:8080/api/todos', newTask);
+  const response = await axios.post(`${API_BASE_URL}/todos`, newTask);
   return response.data;
 });
 
 // Async thunk to toggle the completion status of a task
 export const toggleTask = createAsyncThunk('tasks/toggleTask', async (id: string) => {
   if (!id) throw new Error('Task ID is required');
-  const response = await axios.patch(`http://localhost:8080/api/todos/${id}/toggle`);
+  const response = await axios.patch(`${API_BASE_URL}/todos/${id}/toggle`);
   return response.data;
 });
 
 // Async thunk to set the completion status of a task to true
 export const setTaskCompletion = createAsyncThunk('tasks/setTaskCompletion', async (id: string) => {
   if (!id) throw new Error('Task ID is required');
-  const response = await axios.patch(`http://localhost:8080/api/todos/${id}/complete`);
+  const response = await axios.patch(`${API_BASE_URL}/todos/${id}/complete`);
   return response.data;
 });
 
@@ -69,14 +71,14 @@ export const editTask = createAsyncThunk('tasks/editTask', async (task: { id: st
     priority: task.newPriority,
     created_at: new Date().toISOString()
   };
-  await axios.put(`http://localhost:8080/api/todos/${task.id}`, updatedTask);
+  await axios.put(`${API_BASE_URL}/todos/${task.id}`, updatedTask);
   return { id: task.id, ...updatedTask };
 });
 
 // Async thunk to delete a task from the backend
 export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id: string) => {
   if (!id) throw new Error('Task ID is required');
-  await axios.delete(`http://localhost:8080/api/todos/${id}`);
+  await axios.delete(`${API_BASE_URL}/todos/${id}`);
   return id;
 });
 
@@ -87,34 +89,46 @@ export const tasksSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTasks.fulfilled, (state, action) => {
-        state.tasks = action.payload;
+      .addCase(fetchTasks.fulfilled, (state: TasksState, action) => {
+        state.tasks = action.payload as Task[];
       })
-      .addCase(addTask.fulfilled, (state, action) => {
-        state.tasks.push(action.payload);
+      .addCase(addTask.fulfilled, (state: TasksState, action) => {
+        const newTask = action.payload as Task;
+        state.tasks.push(newTask);
       })
-      .addCase(toggleTask.fulfilled, (state, action) => {
-        const task = state.tasks.find((t) => t.id === action.payload.id);
+      .addCase(toggleTask.fulfilled, (state: TasksState, action) => {
+        const payload = action.payload as { id: string; completed: boolean };
+        const task = state.tasks.find((t: Task) => t.id === payload.id);
         if (task) {
-          task.completed = action.payload.completed;
+          task.completed = payload.completed;
         }
       })
-      .addCase(setTaskCompletion.fulfilled, (state, action) => {
-        const task = state.tasks.find((t) => t.id === action.payload.id);
+      .addCase(setTaskCompletion.fulfilled, (state: TasksState, action) => {
+        const payload = action.payload as { id: string; completed: boolean };
+        const task = state.tasks.find((t: Task) => t.id === payload.id);
         if (task) {
-          task.completed = action.payload.completed;
+          task.completed = payload.completed;
         }
       })
-      .addCase(editTask.fulfilled, (state, action) => {
-        const task = state.tasks.find((t) => t.id === action.payload.id);
+      .addCase(editTask.fulfilled, (state: TasksState, action) => {
+        const payload = {
+          id: action.payload.id,
+          title: action.payload.title,
+          description: action.payload.description,
+          completed: action.payload.completed,
+          priority: action.payload.priority,
+          createdAt: action.payload.created_at,
+        };
+        const task = state.tasks.find((t: Task) => t.id === payload.id);
         if (task) {
-          task.title = action.payload.title;
-          task.priority = action.payload.priority;
-          task.description = action.payload.description;
+          task.title = payload.title;
+          task.priority = payload.priority;
+          task.description = payload.description;
         }
       })
-      .addCase(deleteTask.fulfilled, (state, action) => {
-        state.tasks = state.tasks.filter((t) => t.id !== action.payload);
+      .addCase(deleteTask.fulfilled, (state: TasksState, action) => {
+        const id = action.payload as string;
+        state.tasks = state.tasks.filter((t: Task) => t.id !== id);
       });
   },
 });

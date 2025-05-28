@@ -46,6 +46,7 @@ pub async fn update_todo(client: &Client, todo_id: &str, mut updated_todo: Todo)
         return Err(TodoServiceError::ValidationError(e));
     }
 
+    
     let collection = get_todo_collection(client);
     let object_id = ObjectId::parse_str(todo_id)?;
     let filter = doc! { "_id": object_id };

@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
     <aside className="h-screen w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white p-6 flex flex-col shadow-lg">
-      <img src="/logo.png" alt="Logo" className="w-32 h-auto mx-auto mb-6" />
+      <Image
+        src="/logo.png"
+        alt="Logo"
+        width={128}
+        height={128}
+        className="w-32 h-auto mx-auto mb-6"
+      />
       <h2 className="text-2xl font-bold mb-6 text-center">Organiser</h2>
       <nav className="flex flex-col space-y-4">
         <NavItem href="/" label="Home" pathname={pathname} />
@@ -24,17 +31,16 @@ function NavItem({
   href,
   label,
   pathname,
-}: {
+}: Readonly<{
   href: string;
   label: string;
   pathname: string;
-}) {
-  const isActive = pathname === href;
+}>) {
   return (
     <Link
       href={href}
-      className={`p-3 rounded-lg transition-colors ${
-        isActive ? "bg-blue-600" : "hover:bg-gray-700"
+      className={`px-4 py-2 rounded-lg text-lg font-medium transition-colors duration-200 hover:bg-gray-700 ${
+        pathname === href ? "bg-gray-700" : ""
       }`}
     >
       {label}
