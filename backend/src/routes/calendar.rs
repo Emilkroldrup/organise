@@ -2,8 +2,7 @@ use actix_web::{web, HttpResponse, Responder};
 use chrono::{DateTime, Utc};
 use mongodb::Client;
 use crate::models::calendar::{CalendarEvent, GoogleCalendarCredentials, GoogleCalendarToken};
-use crate::services::calendar_service::{self, CalendarServiceError};
-use validator::Validate;
+use crate::services::calendar_service;
 
 /// Get all calendar events
 pub async fn get_all_events(client: web::Data<Client>) -> impl Responder {
@@ -72,7 +71,7 @@ pub async fn sync_google_calendar(
 }
 
 /// Configure the calendar routes
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/calendar")
             .route("/events", web::get().to(get_all_events))
@@ -82,4 +81,4 @@ pub fn config(cfg: &mut web::ServiceConfig) {
             .route("/events/{id}", web::delete().to(delete_event))
             .route("/sync/google", web::post().to(sync_google_calendar))
     );
-} 
+}

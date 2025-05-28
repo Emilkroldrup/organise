@@ -56,7 +56,7 @@ async fn toggle_todo_completion(db: web::Data<Client>, todo_id: web::Path<String
     }
 }
 
-pub fn init_todo_routes(cfg: &mut web::ServiceConfig) {
+pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(get_todos);
     cfg.service(create_todo);
     cfg.service(edit_todo);

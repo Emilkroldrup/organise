@@ -1,5 +1,6 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from 'axios';
+import { RootState } from "../store";
 
 interface Task {
   id: string;
@@ -7,15 +8,20 @@ interface Task {
   description: string;
   completed: boolean;
   priority: string;
-  createdAt: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 interface TasksState {
   tasks: Task[];
+  status: "idle" | "loading" | "succeeded" | "failed";
+  error: string | null;
 }
 
 const initialState: TasksState = {
   tasks: [],
+  status: "idle",
+  error: null
 };
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? 'http://localhost:8080/api';
@@ -29,7 +35,7 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async () => {
     description: task.description,
     completed: task.completed,
     priority: task.priority,
-    createdAt: task.created_at,
+    created_at: task.created_at,
   }));
   return tasks;
 });
@@ -86,15 +92,26 @@ export const deleteTask = createAsyncThunk('tasks/deleteTask', async (id: string
 export const tasksSlice = createSlice({
   name: "tasks",
   initialState,
-  reducers: {},
+  reducers: {
+    reorderTasks: (state, action: PayloadAction<Task[]>) => {
+      state.tasks = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchTasks.fulfilled, (state: TasksState, action) => {
-        state.tasks = action.payload as Task[];
+      .addCase(fetchTasks.pending, (state) => {
+        state.status = "loading";
       })
-      .addCase(addTask.fulfilled, (state: TasksState, action) => {
-        const newTask = action.payload as Task;
-        state.tasks.push(newTask);
+      .addCase(fetchTasks.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.tasks = action.payload;
+      })
+      .addCase(fetchTasks.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message || null;
+      })
+      .addCase(addTask.fulfilled, (state, action) => {
+        state.tasks.push(action.payload);
       })
       .addCase(toggleTask.fulfilled, (state: TasksState, action) => {
         const payload = action.payload as { id: string; completed: boolean };
@@ -132,5 +149,20 @@ export const tasksSlice = createSlice({
       });
   },
 });
+
+export const { reorderTasks } = tasksSlice.actions;
+
+// Selector functions
+export const selectAllTasks = (state: RootState) => state.tasks.tasks;
+export const selectTasksStatus = (state: RootState) => state.tasks.status;
+export const selectTasksError = (state: RootState) => state.tasks.error;
+export const selectTaskById = (state: RootState, taskId: string) => 
+  state.tasks.tasks.find(task => task.id === taskId);
+export const selectTasksByPriority = (state: RootState, priority: string) =>
+  state.tasks.tasks.filter(task => task.priority === priority);
+export const selectCompletedTasks = (state: RootState) =>
+  state.tasks.tasks.filter(task => task.completed);
+export const selectIncompleteTasks = (state: RootState) =>
+  state.tasks.tasks.filter(task => !task.completed);
 
 export default tasksSlice.reducer;
