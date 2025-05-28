@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -73,6 +72,8 @@ function NavItem({
   icon: React.ReactNode;
   pathname: string;
 }>) {
+  const isActive = pathname === href;
+
   return (
     <Link
       href={href}

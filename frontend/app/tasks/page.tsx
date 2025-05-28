@@ -9,6 +9,7 @@ import {
   editTask,
   deleteTask,
   reorderTasks,
+  toggleTask,
 } from "@/redux/slices/tasksSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import {

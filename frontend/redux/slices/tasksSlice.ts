@@ -108,7 +108,7 @@ export const tasksSlice = createSlice({
       })
       .addCase(fetchTasks.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message || null;
+        state.error = action.error.message ?? null;
       })
       .addCase(addTask.fulfilled, (state, action) => {
         state.tasks.push(action.payload);
